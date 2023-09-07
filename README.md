@@ -28,13 +28,15 @@ SLACK_APP_TOKEN=<Your Slack App Token>
 3. Navigate to the "Basic Information" section under "Settings" and scroll down to "App Credentials". Here, you will find your "Signing Secret" and "App Token" (under "Tokens for Your Workspace").
 4. Navigate to the "OAuth & Permissions" section under "Features". Here, you will find your "Bot Token".
 5. In the "Scopes" section, add the following bot token scopes: `app_mentions:read`, `channels:history`, `channels:read`, `chat:write`, `commands`, `groups:history`, `groups:read`, `im:history`, `im:read`, `im:write`, `mpim:history`, `mpim:read`, `mpim:write`.
-6. Install the app to your workspace.
+6. Enable Event Subscriptions under "Features" and add the following event subscriptions: `app_mention`.
+7. Install the app to your workspace.
 
 ## Usage
 
 1. Run `node index.js` or `npm run start` to start the bot.
-2. In your Slack workspace, mention the bot in a message with a question. For example: `@mendable_bot What is the weather like today?`
-3. The bot will respond with an answer and provide sources for its information.
+2. Add the bot to a channel in your Slack workspace.
+3. Mention the bot in a message with a question. For example: `@MendableAI How to create a product copilot?`
+4. The bot will respond with an answer in a thread and provide sources for its information.
 
 ## Features
 
