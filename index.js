@@ -55,7 +55,6 @@ async function getAnswerAndSources(question, history = []) {
     conversation_id: conversation_id,
   };
 
-  console.log(data);
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -69,7 +68,6 @@ async function getAnswerAndSources(question, history = []) {
 app.message(async ({ message, say }) => {
   try {
     const messageContent = message.text;
-    console.log(message);
 
     if (!messageContent.startsWith(`<@${context.botUserId}>`)) {
       return;
@@ -117,7 +115,6 @@ app.message(async ({ message, say }) => {
 // create an edpoint for challenge
 
 app.event("app_mention", async ({ event, context, client, say }) => {
-  console.log(event);
   try {
     let messageContent = event.text;
     let formattedMessage = messageContent.split(`<@${context.botUserId}>`)[1];
