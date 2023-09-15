@@ -150,7 +150,7 @@ app.event("app_mention", async ({ event, context, client, say }) => {
       thread_ts: threadId,
       // tag the user who asked the question
       text: `
-      <@${event.user}>\n\n${answer}\n\n\n- Verfied Sources:\n${sources}`,
+      <@${event.user}>\n\n${answer}\n\n\n- Verified Sources:\n${sources}`,
       unfurl_links: false,
     });
   } catch (error) {
