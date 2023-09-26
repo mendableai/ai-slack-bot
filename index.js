@@ -100,7 +100,7 @@ async function listenToThreadReply(event, say, editMessage) {
 
     await say({
       thread_ts: threadData.thread_ts,
-      text: `Feedback edit was submitted. We are processing the documentation changes in your GitHub repository. A PR link will be sent once it is ready!`, // your response here
+      text: `Edit was submitted. We are processing the documentation changes in your GitHub repository. A PR link will be sent once it is ready!`, // your response here
     });
 
 
