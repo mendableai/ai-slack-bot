@@ -82,10 +82,12 @@ async function listenToThreadReply(event, say, editMessage) {
       // anon_key: `${MENDABLE_KEY}`,
       question: `${originalQuestion}`,
       edit_text: `${editMessage}`,
+      thread_ts: `${threadData.thread_ts}`,
+      webhook_url: "https://hooks.slack.com/services/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",
     };
 
 
-    const response = await fetch(url, {
+    fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -93,10 +95,12 @@ async function listenToThreadReply(event, say, editMessage) {
       body: JSON.stringify(data),
     });
 
+    
+
 
     await say({
       thread_ts: threadData.thread_ts,
-      text: `Feedback was submitted. We are processing documentation changes. Will send a PR link once it is ready!`, // your response here
+      text: `Feedback edit was submitted. We are processing the documentation changes in your GitHub repository. A PR link will be sent once it is ready!`, // your response here
     });
 
 
