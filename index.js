@@ -75,12 +75,29 @@ async function listenToThreadReply(event, say, editMessage) {
 
     const originalQuestion = threadData.question;
 
+    // post request to api.mendable.ai/v0/mendableEditDocs
+    const url = "https://api.mendable.ai/v0/mendableEditDocs";
+
+    const data = {
+      // anon_key: `${MENDABLE_KEY}`,
+      // question: `${originalQuestion}`,
+      edit_text: `${editMessage}`,
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
 
     await say({
       thread_ts: threadData.thread_ts,
       text: `Feedback was submitted. We are processing documentation changes. Will send a PR link once it is ready!`, // your response here
     });
+
 
     // api call to mendable to submit feedback
 
