@@ -80,10 +80,10 @@ async function listenToThreadReply(event, say, editMessage) {
 
     const data = {
       // anon_key: `${MENDABLE_KEY}`,
-      // question: `${originalQuestion}`,
+      question: `${originalQuestion}`,
       edit_text: `${editMessage}`,
     };
-    
+
 
     const response = await fetch(url, {
       method: "POST",
