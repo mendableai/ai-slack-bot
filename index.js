@@ -76,7 +76,7 @@ async function listenToThreadReply(event, say, editMessage) {
     const originalQuestion = threadData.question;
 
     // post request to api.mendable.ai/v0/mendableEditDocs
-    const url = "https://api.mendable.ai/v0/mendableEditDocs";
+    const url = "https://mendable-js-staging.fly.dev/v0/mendableEditDocs";
 
     const data = {
       // anon_key: `${MENDABLE_KEY}`,
