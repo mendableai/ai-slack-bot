@@ -1,4 +1,5 @@
 const { App } = require("@slack/bolt");
+const { WebClient } = require('@slack/web-api');
 const fetch = require("node-fetch");
 require("dotenv").config();
 
@@ -15,6 +16,7 @@ const app = new App({
   socketMode: true,
 });
 
+const web = new WebClient(SLACK_BOT_TOKEN);
 const historyMap = new Map();
 const threadToChannelMap = new Map();
 const originalQuestionMap = new Map();
@@ -70,22 +72,35 @@ async function getAnswerAndSources(question, history = []) {
 async function listenToThreadReply(event, say, editMessage) {
   try {
     // Retrieve the original question and thread_ts
-    const threadData = originalQuestionMap.get(event.thread_ts || event.ts);
-    if (!threadData) return; // if no data found, exit
+    // const threadData = originalQuestionMap.get(event.thread_ts || event.ts);
+    // if (!threadData) return; // if no data found, exit
 
-    const originalQuestion = threadData.question;
+    // get original question and thread_ts from the event
+
+    const thread = await web.conversations.replies({
+      channel: event.channel,
+      ts: event.thread_ts || event.ts,
+    });
+
+    // Find the original message in the thread (the one without a parent_user_id)
+    const originalMessage = thread.messages.find(msg => !msg.parent_user_id);
+    if (!originalMessage) return;
+
+    const originalQuestionText = originalMessage.text;
 
     // post request to api.mendable.ai/v0/mendableEditDocs
     const url = "https://mendable-js-staging.fly.dev/v0/mendableEditDocs";
 
+
     const data = {
       // anon_key: `${MENDABLE_KEY}`,
-      question: `${originalQuestion}`,
+      question: `${originalQuestionText}`,
       edit_text: `${editMessage}`,
-      thread_ts: `${threadData.thread_ts}`,
+      thread_ts: `${originalMessage.ts}`,
       webhook_url: process.env.SLACK_WEBHOOK_URL,
     };
 
+    console.log(data);
 
     fetch(url, {
       method: "POST",
@@ -99,7 +114,7 @@ async function listenToThreadReply(event, say, editMessage) {
 
 
     await say({
-      thread_ts: threadData.thread_ts,
+      thread_ts: originalMessage.ts,
       text: `Edit was submitted. We are processing the documentation changes in your GitHub repository. A PR link will be sent once it is ready!`, // your response here
     });
 
