@@ -83,6 +83,7 @@ async function listenToThreadReply(event, say, editMessage) {
       // question: `${originalQuestion}`,
       edit_text: `${editMessage}`,
     };
+    
 
     const response = await fetch(url, {
       method: "POST",
