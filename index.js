@@ -83,7 +83,7 @@ async function listenToThreadReply(event, say, editMessage) {
       question: `${originalQuestion}`,
       edit_text: `${editMessage}`,
       thread_ts: `${threadData.thread_ts}`,
-      webhook_url: "https://hooks.slack.com/services/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",
+      webhook_url: process.env.SLACK_WEBHOOK_URL,
     };
 
 
