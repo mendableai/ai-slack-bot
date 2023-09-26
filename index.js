@@ -17,6 +17,7 @@ const app = new App({
 
 const historyMap = new Map();
 const threadToChannelMap = new Map();
+const originalQuestionMap = new Map();
 
 async function createConversation() {
   const url = "https://api.mendable.ai/v0/newConversation";
@@ -65,6 +66,88 @@ async function getAnswerAndSources(question, history = []) {
 
   return { response, conversation_id };
 }
+
+async function listenToThreadReply(event, say, editMessage) {
+  try {
+    // Retrieve the original question and thread_ts
+    const threadData = originalQuestionMap.get(event.thread_ts || event.ts);
+    if (!threadData) return; // if no data found, exit
+
+    const originalQuestion = threadData.question;
+
+
+
+    await say({
+      thread_ts: threadData.thread_ts,
+      text: `Feedback was submitted. We are processing documentation changes. Will send a PR link once it is ready!`, // your response here
+    });
+
+    // api call to mendable to submit feedback
+
+    
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// create an edpoint for challenge
+
+app.event("app_mention", async ({ event, context, client, say }) => {
+  try {
+    let messageContent = event.text;
+    let formattedMessage = messageContent.split(`<@${context.botUserId}>`)[1];
+
+    if (!formattedMessage) return;
+
+    let threadId = event.thread_ts || event.ts;
+    let channelId = event.channel;
+
+    let history = historyMap.get(threadId) || [];
+
+    if (formattedMessage.includes("edit:")) {
+      listenToThreadReply(event, say, formattedMessage.split("edit:")[1]);
+      return;
+    }
+
+    // If it's a new message (no thread_ts in event), store the original question and thread_ts
+    if (!event.thread_ts) {
+      originalQuestionMap.set(threadId, {
+        question: formattedMessage.trim(),
+        thread_ts: threadId,
+      });
+    }
+    const { response, conversation_id } = await getAnswerAndSources(
+      formattedMessage.trim(),
+      history
+    );
+
+    const responseJSON = await response.json();
+    const answer = responseJSON["answer"]["text"];
+    const sources = responseJSON["sources"]
+      .map((source) => source["link"])
+      .join("\n");
+
+    history.push({
+      prompt: formattedMessage.trim(),
+      response: answer,
+      conversation_id: conversation_id,
+    });
+
+    historyMap.set(threadId, history);
+
+    await say({
+      channel: channelId,
+      thread_ts: threadId,
+      // tag the user who asked the question
+      text: `
+      <@${event.user}>\n\n${answer}\n\n\n- Verfied Sources:\n${sources}`,
+      unfurl_links: false,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 app.message(async ({ message, say }) => {
   try {
     const messageContent = message.text;
@@ -72,6 +155,8 @@ app.message(async ({ message, say }) => {
     if (!messageContent.startsWith(`<@${context.botUserId}>`)) {
       return;
     }
+
+    console.log(message);
 
     let formattedMessage = messageContent;
     formattedMessage = formattedMessage.split(`<@${context.botUserId}>`)[1];
@@ -109,52 +194,6 @@ app.message(async ({ message, say }) => {
   } catch (error) {
     console.log(error);
     console.log("Something went wrong!");
-  }
-});
-
-// create an edpoint for challenge
-
-app.event("app_mention", async ({ event, context, client, say }) => {
-  try {
-    let messageContent = event.text;
-    let formattedMessage = messageContent.split(`<@${context.botUserId}>`)[1];
-
-    if (!formattedMessage) return;
-
-    let threadId = event.thread_ts || event.ts;
-    let channelId = event.channel;
-
-    let history = historyMap.get(threadId) || [];
-
-    const { response, conversation_id } = await getAnswerAndSources(
-      formattedMessage.trim(),
-      history
-    );
-
-    const responseJSON = await response.json();
-    const answer = responseJSON["answer"]["text"];
-    const sources = responseJSON["sources"]
-      .map((source) => source["link"])
-      .join("\n");
-
-    history.push({
-      prompt: formattedMessage.trim(),
-      response: answer,
-      conversation_id: conversation_id,
-    });
-
-    historyMap.set(threadId, history);
-
-    await say({
-      channel: channelId,
-      thread_ts: threadId,
-      // tag the user who asked the question
-      text: `
-      <@${event.user}>\n\n${answer}\n\n\n- Verfied Sources:\n${sources}`,
-      unfurl_links: false,
-    });
-  } catch (error) {
-    console.error(error);
   }
 });
 
